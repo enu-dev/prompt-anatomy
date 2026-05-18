@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="プロンプトに構造を与えると、AIは別人になる。診断 → 構造化までを1ページで体験できるツール。">
+  <title>Prompt Anatomy - プロンプトに構造を与えるツール</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/templates.js" defer></script>
+  <script src="js/diagnose.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <div class="brand">
+        <h1 class="brand-name">Prompt Anatomy</h1>
+        <p class="brand-tagline">プロンプトに構造を与えると、AIは別人になる。</p>
+      </div>
+      <nav class="mode-tabs" role="tablist" aria-label="モード切替">
+        <button class="mode-tab is-active" role="tab" aria-selected="true" data-mode="diagnose" id="tab-diagnose">
+          <span class="mode-tab-icon" aria-hidden="true">💉</span>
+          <span>診断する</span>
+        </button>
+        <button class="mode-tab" role="tab" aria-selected="false" data-mode="build" id="tab-build">
+          <span class="mode-tab-icon" aria-hidden="true">🧱</span>
+          <span>組み立てる</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container main">
+    <!-- ===== 診断モード ===== -->
+    <section class="panel diagnose-panel" id="panel-diagnose" role="tabpanel" aria-labelledby="tab-diagnose">
+      <div class="panel-grid">
+        <!-- 入力エリア -->
+        <div class="panel-input">
+          <h2 class="panel-title">あなたのプロンプトを貼り付け</h2>
+          <p class="panel-sub">AIから思った答えが返ってこないとき、たいていプロンプトに構造がありません。</p>
+          <textarea
+            id="diagnose-input"
+            class="textarea diagnose-textarea"
+            placeholder="例：「コード書いて」&#10;例：「いい感じにまとめて」&#10;例：「翻訳してほしい」"
+            aria-label="診断するプロンプトを入力"
+          ></textarea>
+          <div class="input-actions">
+            <button class="btn btn-primary" id="btn-diagnose" type="button">
+              <span aria-hidden="true">💉</span>
+              <span>診断する</span>
+            </button>
+            <button class="btn btn-ghost" id="btn-sample-bad" type="button">悪い例を試す</button>
+            <button class="btn btn-ghost" id="btn-sample-good" type="button">良い例を試す</button>
+          </div>
+        </div>
+
+        <!-- 結果エリア -->
+        <div class="panel-output">
+          <div class="diagnose-result" id="diagnose-result" aria-live="polite">
+            <div class="diagnose-empty">
+              <div class="empty-icon" aria-hidden="true">📋</div>
+              <p>左にプロンプトを貼り付けて<br>「診断する」を押してください。</p>
+              <p class="empty-hint">Role / Context / Task / Format の4要素で<br>プロンプトの構造を可視化します。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ビルドモード ===== -->
+    <section class="panel build-panel is-hidden" id="panel-build" role="tabpanel" aria-labelledby="tab-build" hidden>
+      <div class="panel-grid">
+        <!-- ビルド入力エリア -->
+        <div class="panel-input">
+          <h2 class="panel-title">テンプレートから組み立てる</h2>
+          <p class="panel-sub">用途を選んでブロックを埋めるだけ。構造化されたプロンプトが完成します。</p>
+
+          <div class="template-chips" id="template-chips" role="radiogroup" aria-label="テンプレート選択">
+            <!-- JSで動的生成 -->
+          </div>
+
+          <div class="block-group">
+            <!-- Role -->
+            <div class="block block-role">
+              <div class="block-header">
+                <span class="block-dot" style="background:var(--color-role)" aria-hidden="true"></span>
+                <h3 class="block-title">Role <span class="block-label">役割</span></h3>
+                <span class="block-hint">誰として答えるか</span>
+              </div>
+              <textarea
+                class="textarea block-textarea"
+                id="block-role"
+                data-key="role"
+                placeholder="例：あなたは経験豊富なソフトウェアエンジニアです。"
+                aria-label="Role 役割"
+              ></textarea>
+            </div>
+
+            <!-- Context -->
+            <div class="block block-context">
+              <div class="block-header">
+                <span class="block-dot" style="background:var(--color-context)" aria-hidden="true"></span>
+                <h3 class="block-title">Context <span class="block-label">文脈</span></h3>
+                <span class="block-hint">背景・前提情報</span>
+              </div>
+              <textarea
+                class="textarea block-textarea"
+                id="block-context"
+                data-key="context"
+                placeholder="例：使用言語はTypeScript、Next.js 14でブログサイトを作っています。"
+                aria-label="Context 文脈"
+              ></textarea>
+            </div>
+
+            <!-- Task -->
+            <div class="block block-task">
+              <div class="block-header">
+                <span class="block-dot" style="background:var(--color-task)" aria-hidden="true"></span>
+                <h3 class="block-title">Task <span class="block-label">指示</span></h3>
+                <span class="block-hint">何をしてほしいか</span>
+              </div>
+              <textarea
+                class="textarea block-textarea"
+                id="block-task"
+                data-key="task"
+                placeholder="例：記事一覧をページネーションする関数を書いてください。"
+                aria-label="Task 指示"
+              ></textarea>
+            </div>
+
+            <!-- Format -->
+            <div class="block block-format">
+              <div class="block-header">
+                <span class="block-dot" style="background:var(--color-format)" aria-hidden="true"></span>
+                <h3 class="block-title">Format <span class="block-label">形式</span></h3>
+                <span class="block-hint">出力形式の指定</span>
+              </div>
+              <textarea
+                class="textarea block-textarea"
+                id="block-format"
+                data-key="format"
+                placeholder="例：コードブロックで出力し、主要な処理にコメントをつけてください。"
+                aria-label="Format 形式"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="input-actions">
+            <button class="btn btn-ghost" id="btn-clear" type="button">クリア</button>
+          </div>
+        </div>
+
+        <!-- プレビューエリア -->
+        <div class="panel-output">
+          <div class="preview-header">
+            <h2 class="panel-title">プレビュー</h2>
+            <div class="format-switch" role="radiogroup" aria-label="出力形式">
+              <button class="format-btn is-active" data-format="xml" type="button" aria-pressed="true">XML形式</button>
+              <button class="format-btn" data-format="plain" type="button" aria-pressed="false">プレーン</button>
+            </div>
+          </div>
+          <pre class="preview" id="preview" aria-live="polite"><code id="preview-code">テンプレートを選ぶか、ブロックを埋めてください。</code></pre>
+          <div class="preview-actions">
+            <button class="btn btn-primary btn-copy" id="btn-copy" type="button">
+              <span aria-hidden="true">📋</span>
+              <span class="copy-label">コピー</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>AIと壁打ちしながら作りました。</p>
+    </div>
+  </footer>
+</body>
+</html>
